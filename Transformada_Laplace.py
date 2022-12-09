@@ -6,20 +6,12 @@ Turma: Sinais e Sistemas 2022/2
 Script: Transformada de Laplace
 """
 
-#https://docs.sympy.org/latest/modules/physics/control/control_plots.html
-from sympy.abc import s
-from sympy.physics.control.lti import TransferFunction
-from sympy.physics.control.control_plots import pole_zero_plot
-from sympy.physics.control.control_plots import pole_zero_numerical_data
-from sympy import sympify
-import sympy as sym
-from sympy import poly
-
 from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
+import control
 
 #------------------------------------------- Para plot 2D----------------------------------------#
 print("Digite as funções do numerador e denominador de acordo com o exemplo:\nDigitando: 1,2,3\nVocê terá a função s^2+2*s+3")
@@ -33,70 +25,19 @@ formD = np.poly1d(lista_d, variable = 's')               # Cria o polinomio da f
 
 print("Função do numerador: \n",formN)
 print("\nFunção do denomidador: \n",formD)
-#\/-----------------------------\/---------------------------------------\/
-# Essa parte do codigo é apenas uma manipulação das variaveis para que possam ser usadas na função de transferência
 
-# PARA FUNÇÃO DO NUMERADOR
-list_n_temp = []      # Lista temporaria que vai armazenar os digitos dados pelo usuario ao numerador da função
-list_n_temp2 = []     # Lista temporaria que vai armazenar os "s" criados para serem usados na função transferencia posteriormente
-list_n_final = []     # Lista temporaria que vai armazenar a função/expressão final do numerador
-list_n_estrela = []   # Lista temporaria que vai armazenar o caracter "*"
-size_n = len(lista_n) # Variavel que será usada como parametro para os loops, tendo como o valor o tamanho da lista_n
-i = len(lista_n)      # Variavel que será usada como parametro para os loops, tendo como o valor o tamanho da lista_n
-    
-while i>0:            # Nesse loop, é criado e armazenado dentro da lista_n_temp2 o caracter "s**"
-    if i == 1:
-        sz = 1
-    else:
-        sz = str(s**(i-1))
-    list_n_temp2.append(sz)
-    i = i - 1
-    
-while i<size_n:       # Nesse loop, é onde sera colocado as expressões armazenadas nas listas temporarias dentro da lista final"
-    list_n_temp.append(lista_n[i])
-    list_n_estrela.append('*')
-    temp_n = str(list_n_temp[i]) + str(list_n_estrela[i]) + str(list_n_temp2[i])
-    list_n_final.append(temp_n)
-    i = i + 1
+transferencia = control.tf(lista_n,lista_d) # Cria a função transferência
+print('Função Transferência', transferencia)
 
-i = 0
-num_str = ' '.join(map(str,list_n_final))      # Converte a lista em uma string
-num_str2 = num_str.replace(' ', '+')           # Substitui todos os espaços em brancos pelo sinal +
-num_final = sympify(num_str2)                  # Cria a forma de expressão para a função do numerador
+polos = control.pole(transferencia) # Calcula os polos da função transferência
+zeros = control.zero(transferencia) # Calcula os zeros da função transferência
 
-# PARA FUNÇÃO DO DENOMINADOR
-list_d_temp = []                  # Lista temporaria que vai armazenar os digitos dados pelo usuario ao denominador da função
-list_d_temp2 = []                 # Lista temporaria que vai armazenar os "s" criados para serem usados na função transferencia posteriormente
-list_d_final = []                 # Lista temporaria que vai armazenar a função/expressão final do denominador
-list_d_estrela = []               # Lista temporaria que vai armazenar o caracter "*"
-size_d = len(lista_d)             # Variavel que será usada como parametro para os loops, tendo como o valor o tamanho da lista_n
-i = len(lista_d)                  # Variavel que será usada como parametro para os loops, tendo como o valor o tamanho da lista_n
-    
-while i>0:                        # Nesse loop, é criado e armazenado dentro da lista_n_temp2 o caracter "s**"
-    if i == 1:
-        sz2 = 1
-    else:
-        sz2 = str(s**(i-1))
-    list_d_temp2.append(sz2)
-    i = i - 1
-    
-while i<size_d:                  # Nesse loop, é onde sera colocado as expressões armazenadas nas listas temporarias dentro da lista final"
-    list_d_temp.append(lista_d[i])
-    list_d_estrela.append('*')
-    temp_d = str(list_d_temp[i]) + str(list_d_estrela[i]) + str(list_d_temp2[i])
-    list_d_final.append(temp_d)
-    i = i + 1
+print('polos=', polos)
+print('zeros=', zeros)
 
-i = 0
-den_str = ' '.join(map(str,list_d_final))      # Converte a lista em uma string
-den_str2 = den_str.replace(' ', '+')           # Substitui todos os espaços em brancos pelo sinal +
-den_final = sympify(den_str2)                  # Cria a forma de expressão para a função do numerador
-#/\-----------------------------/\---------------------------------------/\
-
-
-tf1 = TransferFunction(num_final, den_final, s) # Função da biblioteca Sympy que calcula a função transferência
-pole_zero_plot(tf1) # Função da biblioteca Sympy que gera o mapa de polos e zero da função transferência
-
+plt.figure()
+control.pzmap(transferencia,1,1,transferencia) # Plota o diagrama de polos e zeros
+plt.show()
 
 
 #------------------------------------------- Para plot 3D----------------------------------------#
